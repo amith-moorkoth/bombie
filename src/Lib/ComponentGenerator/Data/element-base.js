@@ -1,0 +1,23 @@
+const ele = {
+  GRIDCONTAINER: { tag: "GRIDCONTAINER", name: "Grid Container" },
+  GRIDITEM: { tag: "GRIDITEM", name: "Grid Item" },
+  STACK: { tag: "STACK", name: "Stack" },
+  TEXTFIELD: { tag: "TEXTFIELD", name: "Text Field" },
+  LABEL: { tag: "LABEL", name: "Label" },
+  CHECKBOX: { tag: "CHECKBOX", name: "Check Box" },
+  SELECT: { tag: "SELECT", name: "Select Box" },
+  CARD: { tag: "CARD", name: "Card" },
+  CARDHEADER: { tag: "CARDHEADER", name: "Card Header" },
+  CARDCONTENT: { tag: "CARDCONTENT", name: "Card Content" },
+  CARDACTIONS: { tag: "CARDACTIONS", name: "Card Actions" },
+  AUTOCOMPLETE: { tag: "AUTOCOMPLETE", name: "Auto Complete" },
+  TABLE: { tag: "TABLE", name: "Table" },
+  TABLEHEADER: { tag: "TABLEHEADER", name: "Table Header" },
+  TABLEBODY: { tag: "TABLEBODY", name: "Table Body" },
+  TABLEROW: { tag: "TABLEROW", name: "Table Row" },
+  TABLECELL: { tag: "TABLECELL", name: "Table Cell" },
+  DIALOG: { tag: "DIALOG", name: "Dialog" },
+  DIALOGCONTENT: { tag: "DIALOGCONTENT", name: "DialogContent" },
+  DIALOGACTIONS: { tag: "DIALOGACTIONS", name: "DialogActions" },
+};
+export default ele;
