@@ -1,6 +1,9 @@
 # Bombie - React Drag and Drop UI Builder Toolkit
 
+
+<p align="center">
 ![Bombie Preview](src/assets/bombie.gif)
+</p>
 
 ## Project Description
 
