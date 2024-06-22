@@ -2,7 +2,7 @@
 
 
 <p align="center">
-![Bombie Preview](src/assets/bombie.gif)
+  <img src="src/assets/bombie.gif" alt="Bombie Preview" />
 </p>
 
 ## Project Description
