@@ -31,10 +31,10 @@ Bombie is a drag-and-drop builder for Material-UI components in React, designed 
     npm start
 5. **Access the Application: Open your browser and navigate to http://localhost:8080/generate-component to start using Bombie.
   
-<center>
+<p align="center">
   <img src="src/assets/logo.svg" alt="React Drag and Drop UI Builder Toolkit" width="200" /><br/>
   <b>Form Engine Builder</b>
-</center>
+</p>
 
 # Note
 This project is for demonstration purposes. For production usage, further optimization and development may be required.
