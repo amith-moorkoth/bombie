@@ -20,7 +20,7 @@ Bombie is a drag-and-drop builder for Material-UI components in React, designed 
    git clone https://github.com/amith-moorkoth/bombie.git
 
 
-2. **Navigate to the Project Directory: cd bombie
+2. **Navigate to the Project Directory: ```bash cd bombie
 3. **Install Dependencies: npm install
 4. **Start the Development Server: npm start
 5. **Access the Application: Open your browser and navigate to http://localhost:8080/generate-component to start using Bombie.
