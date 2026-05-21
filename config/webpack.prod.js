@@ -1,6 +1,20 @@
 const paths = require("./paths");
-const { merge } = require("webpack-merge");
+const { mergeWithRules } = require("webpack-merge");
 const common = require("./webpack.common.js");
+
+// mergeWithRules replaces the CSS rule's `use` chain instead of letting the
+// default merger append a second copy. Without this, prod ends up running
+// css-loader + sass-loader twice on the same file (once from common.js,
+// once from this file) and the second pass fails because it receives
+// already-transformed CSS instead of raw SCSS.
+const merge = mergeWithRules({
+  module: {
+    rules: {
+      test: "match",
+      use: "replace",
+    },
+  },
+});
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
