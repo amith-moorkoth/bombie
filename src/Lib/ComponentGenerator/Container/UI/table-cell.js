@@ -1,77 +1,110 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, TableHead, TableCell } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Box } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_TableCell = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-    >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="align"
-          size="small"
-          value={getFromState(formData, "align")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "align", e.target.value));
-          }}
-        />
-        <TextField
-          variant="outlined"
-          label="rowKey"
-          size="small"
-          value={getFromState(formData, "rowKey")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "rowKey", e.target.value));
-          }}
-        />
-      </PropertyController>
-      <TableCell align={currentChild?.props?.align}>{children}</TableCell>
-    </DropBox>
-  );
+const schema = [
+  {
+    name: "text",
+    label: "Static text",
+    type: "text",
+    group: "Content",
+    span: "full",
+    helper: "Plain text shown when no child component is dropped",
+  },
+  {
+    name: "align",
+    label: "Text align",
+    type: "select",
+    group: "Appearance",
+    options: ["inherit", "left", "center", "right", "justify"],
+  },
+  {
+    name: "padding",
+    label: "Padding",
+    type: "select",
+    group: "Appearance",
+    options: ["normal", "checkbox", "none"],
+  },
+  {
+    name: "fontWeight",
+    label: "Font weight",
+    type: "select",
+    group: "Appearance",
+    options: ["400", "500", "600", "700"],
+  },
+  {
+    name: "width",
+    label: "Width (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 600,
+    step: 10,
+  },
+  {
+    name: "minWidth",
+    label: "Min width (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 400,
+    step: 10,
+  },
+  {
+    name: "bgcolor",
+    label: "Background",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "transparent",
+      "grey.50",
+      "primary.50",
+      "warning.50",
+      "error.50",
+      "success.50",
+    ],
+  },
+  {
+    name: "header",
+    label: "Header cell",
+    type: "boolean",
+    group: "Semantics",
+    helper: "Renders bold; uses <th> in preview",
+  },
+];
+
+const paddingMap = { normal: 1.5, none: 0, checkbox: 0.5 };
+
+/**
+ * Builder-mode TableCell: a flex item inside a TableRow. Preview renders a
+ * real <TableCell> with the right align/padding/scope.
+ */
+export const UI_TableCell = makeContainerComponent({
+  schema,
+  render: (props, children) => {
+    const padKey = props.padding || "normal";
+    return (
+      <Box
+        sx={{
+          flex: props.width ? `0 0 ${props.width}px` : 1,
+          minWidth: props.minWidth || undefined,
+          width: props.width || undefined,
+          p: paddingMap[padKey] ?? 1.5,
+          textAlign: props.align || "left",
+          fontWeight: props.fontWeight
+            ? Number(props.fontWeight)
+            : props.header
+              ? 600
+              : 400,
+          bgcolor: props.bgcolor || undefined,
+          borderRight: "1px solid",
+          borderColor: "divider",
+          "&:last-of-type": { borderRight: "none" },
+        }}
+      >
+        {children}
+        {props.text && !React.Children.count(children) ? props.text : null}
+      </Box>
+    );
+  },
 });

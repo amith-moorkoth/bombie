@@ -1,86 +1,210 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
 import {
-  Grid,
-  Card,
-  Badge,
+  Box,
+  Button,
+  CardHeader,
+  Chip,
+  Paper,
   Stack,
   Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  CardHeader,
 } from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, Paper, TableContainer, Table } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_Dialog = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-    >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="open"
+const MAX_WIDTH_OPTIONS = ["xs", "sm", "md", "lg", "xl", "false"];
+
+const schema = [
+  {
+    name: "dialogTitle",
+    label: "Title",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+  {
+    name: "dialogSubheader",
+    label: "Subtitle",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+
+  {
+    name: "triggerLabel",
+    label: "Trigger button label",
+    type: "text",
+    group: "Trigger button",
+    span: "full",
+    helper: "Label of the button that opens the dialog in preview",
+  },
+  {
+    name: "triggerVariant",
+    label: "Trigger variant",
+    type: "select",
+    group: "Trigger button",
+    options: ["text", "outlined", "contained"],
+  },
+  {
+    name: "triggerColor",
+    label: "Trigger color",
+    type: "select",
+    group: "Trigger button",
+    options: [
+      "primary",
+      "secondary",
+      "success",
+      "error",
+      "warning",
+      "info",
+      "inherit",
+    ],
+  },
+  {
+    name: "triggerSize",
+    label: "Trigger size",
+    type: "select",
+    group: "Trigger button",
+    options: ["small", "medium", "large"],
+  },
+
+  {
+    name: "maxWidth",
+    label: "Max width",
+    type: "select",
+    group: "Sizing",
+    options: MAX_WIDTH_OPTIONS,
+    helper: "MUI breakpoint key, or 'false' for unconstrained",
+  },
+  { name: "fullWidth", label: "Full width", type: "boolean", group: "Sizing" },
+  {
+    name: "fullScreen",
+    label: "Full screen",
+    type: "boolean",
+    group: "Sizing",
+  },
+  {
+    name: "scroll",
+    label: "Scroll",
+    type: "select",
+    group: "Behavior",
+    options: ["paper", "body"],
+    helper: "Where scrolling happens when content overflows",
+  },
+
+  {
+    name: "openByDefault",
+    label: "Open by default in preview",
+    type: "boolean",
+    group: "Behavior",
+    helper: "Useful when iterating on the dialog content",
+  },
+  {
+    name: "disableEscapeKeyDown",
+    label: "Disable Esc key",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "disableBackdropClick",
+    label: "Disable backdrop click",
+    type: "boolean",
+    group: "Behavior",
+  },
+
+  {
+    name: "padding",
+    label: "Title padding",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 8,
+    step: 0.5,
+  },
+  {
+    name: "elevation",
+    label: "Elevation",
+    type: "number",
+    group: "Appearance",
+    min: 0,
+    max: 24,
+    helper: "Paper depth (0-24)",
+  },
+  {
+    name: "transitionDuration",
+    label: "Transition (ms)",
+    type: "number",
+    group: "Behavior",
+    min: 0,
+    max: 1000,
+    step: 50,
+  },
+];
+
+/**
+ * Builder canvas: we render the dialog as a flat Paper preceded by a
+ * disabled trigger-button preview, so the user can both see *what the
+ * trigger looks like* AND edit the dialog body directly. The real modal
+ * behaviour (click to open, Esc/backdrop to close) lives in the live
+ * preview (see render-preview.js → DIALOG).
+ */
+export const UI_Dialog = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <Stack spacing={2}>
+      <Box>
+        <Button
+          variant={props.triggerVariant || "contained"}
+          color={props.triggerColor || "primary"}
+          size={props.triggerSize || "medium"}
+          startIcon={<OpenInNewOutlinedIcon />}
+          disableRipple
+          sx={{ pointerEvents: "none", alignSelf: "flex-start" }}
+        >
+          {props.triggerLabel || props.dialogTitle || "Open dialog"}
+        </Button>
+        <Chip
           size="small"
-          value={getFromState(formData, "open")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "open", e.target.value));
-          }}
-        />{" "}
-        <TextField
+          label="opens the dialog below in preview"
+          sx={{ ml: 1, fontSize: 10 }}
           variant="outlined"
-          label="dialogTitle"
-          size="small"
-          value={getFromState(formData, "dialogTitle")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "dialogTitle", e.target.value));
-          }}
         />
-      </PropertyController>
-      <Card open={false} PaperComponent={Paper}>
-        <CardHeader
+      </Box>
+
+      <Paper
+        variant={props.elevation === 0 ? "outlined" : "elevation"}
+        elevation={props.elevation !== undefined ? Number(props.elevation) : 8}
+        sx={{
+          width: "100%",
+          maxWidth: props.fullScreen ? "100%" : 600,
+          mx: "auto",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
+        {props.dialogTitle && (
+          <CardHeader
+            title={props.dialogTitle}
+            subheader={props.dialogSubheader}
+            sx={{
+              p:
+                props.padding !== undefined ? Number(props.padding) : undefined,
+            }}
+          />
+        )}
+        <Box>{children}</Box>
+        <Typography
+          variant="caption"
+          color="text.disabled"
           sx={{
-            padding: currentChild?.props?.padding || "0px !important",
+            display: "block",
+            textAlign: "center",
+            py: 0.5,
+            fontSize: 10,
           }}
-          title={currentChild?.props?.dialogTitle}
-        />
-        {children}
-      </Card>
-    </DropBox>
-  );
+        >
+          Dialog body · click the trigger in preview to open as a real modal
+        </Typography>
+      </Paper>
+    </Stack>
+  ),
 });

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bombie</title>
+    <script>
+      // GitHub Pages SPA shim: serves this file on any unknown path, then
+      // redirects to the index with the original path encoded in the query
+      // string. index.html restores the real URL on load. See:
+      // https://github.com/rafgraph/spa-github-pages
+      // pathSegmentsToKeep = 1 because the app is deployed under /bombie/.
+      // Change to 0 when deploying at root (e.g. a custom domain).
+      (function () {
+        var pathSegmentsToKeep = 1;
+        var l = window.location;
+        l.replace(
+          l.protocol +
+            "//" +
+            l.hostname +
+            (l.port ? ":" + l.port : "") +
+            l.pathname
+              .split("/")
+              .slice(0, 1 + pathSegmentsToKeep)
+              .join("/") +
+            "/?/" +
+            l.pathname
+              .slice(1)
+              .split("/")
+              .slice(pathSegmentsToKeep)
+              .join("/")
+              .replace(/&/g, "~and~") +
+            (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
+            l.hash
+        );
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

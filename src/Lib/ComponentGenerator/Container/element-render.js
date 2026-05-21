@@ -1,5 +1,6 @@
 import React from "react";
-import eleBase from "../Data/element-base";
+
+// Existing hand-rolled UI components
 import { UI_GridContainer } from "./UI/grid-container";
 import { UI_GridItem } from "./UI/grid-item";
 import { UI_TextField } from "./UI/text-field";
@@ -21,6 +22,75 @@ import { UI_Dialog } from "./UI/dialog";
 import { UI_DialogContent } from "./UI/dialog-content";
 import { UI_DialogActions } from "./UI/dialog-actions";
 
+// New factory-built UI components
+import { UI_Button } from "./UI/button";
+import { UI_IconButton } from "./UI/icon-button";
+import { UI_Switch } from "./UI/switch";
+import { UI_RadioGroup } from "./UI/radio-group";
+import { UI_Slider } from "./UI/slider";
+import { UI_Typography } from "./UI/typography";
+import { UI_Avatar } from "./UI/avatar";
+import { UI_Chip } from "./UI/chip";
+import { UI_Divider } from "./UI/divider";
+import { UI_Tooltip } from "./UI/tooltip";
+import { UI_Alert } from "./UI/alert";
+import { UI_LinearProgress } from "./UI/linear-progress";
+import { UI_CircularProgress } from "./UI/circular-progress";
+import { UI_Skeleton } from "./UI/skeleton";
+import { UI_Tabs } from "./UI/tabs";
+import { UI_Stepper } from "./UI/stepper";
+import { UI_Breadcrumbs } from "./UI/breadcrumbs";
+import { UI_Pagination } from "./UI/pagination";
+import { UI_Accordion } from "./UI/accordion";
+
+// Tag → component registry. Adding a new component is one import + one entry.
+const REGISTRY = {
+  // Layout
+  CARD: UI_Card,
+  CARDHEADER: UI_CardHeader,
+  CARDCONTENT: UI_CardContent,
+  CARDACTIONS: UI_CardAction,
+  GRIDCONTAINER: UI_GridContainer,
+  GRIDITEM: UI_GridItem,
+  STACK: UI_Stack,
+  DIALOG: UI_Dialog,
+  DIALOGCONTENT: UI_DialogContent,
+  DIALOGACTIONS: UI_DialogActions,
+  ACCORDION: UI_Accordion,
+  // Form Elements
+  TEXTFIELD: UI_TextField,
+  LABEL: UI_Label,
+  CHECKBOX: UI_CheckBox,
+  SELECT: UI_SelectBox,
+  AUTOCOMPLETE: UI_Autocomplete,
+  BUTTON: UI_Button,
+  ICONBUTTON: UI_IconButton,
+  SWITCH: UI_Switch,
+  RADIOGROUP: UI_RadioGroup,
+  SLIDER: UI_Slider,
+  // Data Display
+  TABLE: UI_Table,
+  TABLEHEADER: UI_TableHeader,
+  TABLEBODY: UI_TableBody,
+  TABLEROW: UI_TableRow,
+  TABLECELL: UI_TableCell,
+  TYPOGRAPHY: UI_Typography,
+  AVATAR: UI_Avatar,
+  CHIP: UI_Chip,
+  DIVIDER: UI_Divider,
+  TOOLTIP: UI_Tooltip,
+  // Feedback
+  ALERT: UI_Alert,
+  LINEAR_PROGRESS: UI_LinearProgress,
+  CIRCULAR_PROGRESS: UI_CircularProgress,
+  SKELETON: UI_Skeleton,
+  // Navigation
+  TABS: UI_Tabs,
+  STEPPER: UI_Stepper,
+  BREADCRUMBS: UI_Breadcrumbs,
+  PAGINATION: UI_Pagination,
+};
+
 export default function ElementRender({
   currentChild,
   handleonDrop,
@@ -28,257 +98,16 @@ export default function ElementRender({
   handleonHover_Move,
   children,
 }) {
-  //const bombedbComponent = ItemTypes.find((obj) => obj.id === currentChild.tag);
-  if (currentChild.info.tag === eleBase.CARD.tag) {
-    return (
-      <UI_Card
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Card>
-    );
-  }
-  if (currentChild.info.tag === eleBase.CARDHEADER.tag) {
-    return (
-      <UI_CardHeader
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_CardHeader>
-    );
-  }
-  if (currentChild.info.tag === eleBase.CARDCONTENT.tag) {
-    return (
-      <UI_CardContent
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_CardContent>
-    );
-  }
-  if (currentChild.info.tag === eleBase.CARDACTIONS.tag) {
-    return (
-      <UI_CardAction
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_CardAction>
-    );
-  }
-  if (currentChild.info.tag === eleBase.GRIDCONTAINER.tag) {
-    return (
-      <UI_GridContainer
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_GridContainer>
-    );
-  }
-  if (currentChild.info.tag === eleBase.GRIDITEM.tag) {
-    return (
-      <UI_GridItem
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_GridItem>
-    );
-  }
-  if (currentChild.info.tag === eleBase.STACK.tag) {
-    return (
-      <UI_Stack
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Stack>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.TEXTFIELD.tag) {
-    return (
-      <UI_TextField
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_TextField>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.LABEL.tag) {
-    return (
-      <UI_Label
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Label>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.CHECKBOX.tag) {
-    return (
-      <UI_CheckBox
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_CheckBox>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.SELECT.tag) {
-    return (
-      <UI_SelectBox
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_SelectBox>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.AUTOCOMPLETE.tag) {
-    return (
-      <UI_Autocomplete
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Autocomplete>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.TABLE.tag) {
-    return (
-      <UI_Table
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Table>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.TABLEHEADER.tag) {
-    return (
-      <UI_TableHeader
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_TableHeader>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.TABLEBODY.tag) {
-    return (
-      <UI_TableBody
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_TableBody>
-    );
-  }
-
-  if (currentChild.info.tag === eleBase.TABLEROW.tag) {
-    return (
-      <UI_TableRow
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_TableRow>
-    );
-  }
-  if (currentChild.info.tag === eleBase.TABLECELL.tag) {
-    return (
-      <UI_TableCell
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_TableCell>
-    );
-  }
-  if (currentChild.info.tag === eleBase.DIALOG.tag) {
-    return (
-      <UI_Dialog
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_Dialog>
-    );
-  }
-  if (currentChild.info.tag === eleBase.DIALOGCONTENT.tag) {
-    return (
-      <UI_DialogContent
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_DialogContent>
-    );
-  }
-  if (currentChild.info.tag === eleBase.DIALOGACTIONS.tag) {
-    return (
-      <UI_DialogActions
-        currentChild={currentChild}
-        handleonDrop={handleonDrop}
-        handleonDrop_Move={handleonDrop_Move}
-        handleonHover_Move={handleonHover_Move}
-      >
-        {children}
-      </UI_DialogActions>
-    );
-  }
-
-  //default
-  return "";
+  const Cmp = REGISTRY[currentChild?.info?.tag];
+  if (!Cmp) return null;
+  return (
+    <Cmp
+      currentChild={currentChild}
+      handleonDrop={handleonDrop}
+      handleonDrop_Move={handleonDrop_Move}
+      handleonHover_Move={handleonHover_Move}
+    >
+      {children}
+    </Cmp>
+  );
 }

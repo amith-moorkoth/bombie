@@ -1,78 +1,122 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import { TextField, Box, Typography } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Typography } from "@mui/material";
+import { makeLeafComponent } from "./Common/make-component";
 
-export const UI_Label = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  {
+    name: "label",
+    label: "Text",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+  { name: "savePath", label: "Save path", type: "text", group: "Content" },
 
-  /*React.useEffect(() => {
-    fetch("/api/weatherforecast").then((res) => {
-      alert(JSON.stringify(res));
-    });
-    //https://localhost:44379/weatherforecast
-  }, []);*/
+  {
+    name: "variant",
+    label: "Variant",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "subtitle1",
+      "subtitle2",
+      "body1",
+      "body2",
+      "caption",
+      "overline",
+      "button",
+    ],
+  },
+  {
+    name: "component",
+    label: "Render as",
+    type: "select",
+    group: "Appearance",
+    options: ["span", "div", "p", "label", "h1", "h2", "h3", "h4", "h5", "h6"],
+  },
+  {
+    name: "color",
+    label: "Color",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "text.primary",
+      "text.secondary",
+      "text.disabled",
+      "primary",
+      "secondary",
+      "success",
+      "warning",
+      "error",
+      "info",
+    ],
+  },
+  {
+    name: "textAlign",
+    label: "Align",
+    type: "select",
+    group: "Appearance",
+    options: ["inherit", "left", "center", "right", "justify"],
+  },
+  {
+    name: "fontWeight",
+    label: "Font weight",
+    type: "select",
+    group: "Appearance",
+    options: ["300", "400", "500", "600", "700", "800"],
+  },
+  {
+    name: "fontStyle",
+    label: "Font style",
+    type: "select",
+    group: "Appearance",
+    options: ["normal", "italic", "oblique"],
+  },
+  {
+    name: "textTransform",
+    label: "Text transform",
+    type: "select",
+    group: "Appearance",
+    options: ["none", "capitalize", "uppercase", "lowercase"],
+  },
 
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+  {
+    name: "gutterBottom",
+    label: "Gutter bottom",
+    type: "boolean",
+    group: "Spacing",
+  },
+  {
+    name: "noWrap",
+    label: "No wrap (ellipsis)",
+    type: "boolean",
+    group: "Layout",
+  },
+];
+
+export const UI_Label = makeLeafComponent({
+  schema,
+  render: (props) => (
+    <Typography
+      variant={props.variant || "body1"}
+      component={props.component || undefined}
+      color={props.color || undefined}
+      gutterBottom={props.gutterBottom}
+      noWrap={props.noWrap}
+      sx={{
+        textAlign: props.textAlign || undefined,
+        fontWeight: props.fontWeight ? Number(props.fontWeight) : undefined,
+        fontStyle: props.fontStyle || undefined,
+        textTransform: props.textTransform || undefined,
+      }}
     >
-      <Typography
-        variant={currentChild?.props?.variant}
-        sx={{ textAlign: currentChild?.props?.textAlign }}
-      >
-        <b>{currentChild?.props?.label}</b>
-      </Typography>
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="variant"
-          size="small"
-          value={getFromState(formData, "variant")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "variant", e.target.value));
-          }}
-        />
-        <TextField
-          variant="outlined"
-          label="label"
-          size="small"
-          value={getFromState(formData, "label")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "label", e.target.value));
-          }}
-        />
-        <TextField
-          variant="outlined"
-          label="textAlign"
-          size="small"
-          value={getFromState(formData, "textAlign")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "textAlign", e.target.value));
-          }}
-        />
-      </PropertyController>
-      {children}
-    </DropBox>
-  );
+      {props.label || "Label"}
+    </Typography>
+  ),
 });

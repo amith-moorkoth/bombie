@@ -1,63 +1,45 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, TableHead, TableRow } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Box } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_TableHeader = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <TableHead>
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-      >
-        <UIController currentChild={currentChild} />
-        <PropertyController
-          currentChild={currentChild}
-          formData={formData}
-        ></PropertyController>
-        {children}
-      </DropBox>
-    </TableHead>
-  );
+const schema = [
+  {
+    name: "bgcolor",
+    label: "Background",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "grey.100",
+      "grey.200",
+      "primary.50",
+      "primary.100",
+      "background.default",
+      "transparent",
+    ],
+  },
+  {
+    name: "borderBottom",
+    label: "Bottom divider",
+    type: "boolean",
+    group: "Appearance",
+  },
+];
+
+/**
+ * Builder-mode TableHeader: a horizontal row container styled like a header.
+ * Preview renders a real <TableHead>.
+ */
+export const UI_TableHeader = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <Box
+      sx={{
+        bgcolor: props.bgcolor || "grey.100",
+        borderBottom: props.borderBottom === false ? "none" : "1px solid",
+        borderColor: "divider",
+      }}
+    >
+      {children}
+    </Box>
+  ),
 });

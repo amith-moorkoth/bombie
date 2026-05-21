@@ -1,88 +1,135 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import { TextField, Box } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { TextField } from "@mui/material";
+import { makeLeafComponent } from "./Common/make-component";
 
-export const UI_TextField = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  { name: "label", label: "Label", type: "text", group: "Content" },
+  { name: "placeholder", label: "Placeholder", type: "text", group: "Content" },
+  {
+    name: "defaultValue",
+    label: "Default value",
+    type: "text",
+    group: "Content",
+  },
+  {
+    name: "helperText",
+    label: "Helper text",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+  {
+    name: "savePath",
+    label: "Save path",
+    type: "text",
+    group: "Content",
+    helper: "Form state key",
+  },
 
-  /*React.useEffect(() => {
-    fetch("/api/weatherforecast").then((res) => {
-      alert(JSON.stringify(res));
-    });
-    //https://localhost:44379/weatherforecast
-  }, []);*/
+  {
+    name: "type",
+    label: "Input type",
+    type: "select",
+    group: "Behavior",
+    options: [
+      "text",
+      "password",
+      "email",
+      "number",
+      "tel",
+      "url",
+      "search",
+      "date",
+      "time",
+      "datetime-local",
+    ],
+  },
+  {
+    name: "autoComplete",
+    label: "Autocomplete",
+    type: "text",
+    group: "Behavior",
+  },
+  { name: "autoFocus", label: "Autofocus", type: "boolean", group: "Behavior" },
+  { name: "required", label: "Required", type: "boolean", group: "Behavior" },
+  { name: "disabled", label: "Disabled", type: "boolean", group: "State" },
+  { name: "readOnly", label: "Read only", type: "boolean", group: "State" },
+  { name: "error", label: "Error state", type: "boolean", group: "State" },
 
-  return (
-    <Box component="span">
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-      >
-        <TextField
-          size={currentChild?.props?.size}
-          fullWidth={currentChild?.props?.fullWidth}
-          label={currentChild?.props?.label}
-        />
-        <UIController currentChild={currentChild} />
-        <PropertyController currentChild={currentChild} formData={formData}>
-          <TextField
-            variant="outlined"
-            label="size"
-            size="small"
-            value={getFromState(formData, "size")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "size", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="fullWidth"
-            size="small"
-            value={getFromState(formData, "fullWidth")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "fullWidth", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="label"
-            size="small"
-            value={getFromState(formData, "label")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "label", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="save path"
-            size="small"
-            value={getFromState(formData, "savePath")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "savePath", e.target.value));
-            }}
-          />
-        </PropertyController>
-        {children}
-      </DropBox>
-    </Box>
-  );
+  {
+    name: "variant",
+    label: "Variant",
+    type: "select",
+    group: "Appearance",
+    options: ["outlined", "filled", "standard"],
+  },
+  {
+    name: "size",
+    label: "Size",
+    type: "select",
+    group: "Appearance",
+    options: ["small", "medium"],
+  },
+  {
+    name: "color",
+    label: "Color",
+    type: "select",
+    group: "Appearance",
+    options: ["primary", "secondary", "success", "error", "warning", "info"],
+  },
+  {
+    name: "margin",
+    label: "Margin",
+    type: "select",
+    group: "Appearance",
+    options: ["none", "dense", "normal"],
+  },
+  {
+    name: "fullWidth",
+    label: "Full width",
+    type: "boolean",
+    group: "Appearance",
+  },
+  {
+    name: "multiline",
+    label: "Multiline",
+    type: "boolean",
+    group: "Appearance",
+  },
+  { name: "rows", label: "Rows", type: "number", group: "Appearance", min: 1 },
+  {
+    name: "maxRows",
+    label: "Max rows",
+    type: "number",
+    group: "Appearance",
+    min: 1,
+  },
+];
+
+export const UI_TextField = makeLeafComponent({
+  schema,
+  render: (props) => (
+    <TextField
+      label={props.label}
+      placeholder={props.placeholder}
+      defaultValue={props.defaultValue}
+      helperText={props.helperText}
+      type={props.type || "text"}
+      autoComplete={props.autoComplete}
+      // eslint-disable-next-line jsx-a11y/no-autofocus -- user-configurable
+      autoFocus={props.autoFocus}
+      required={props.required}
+      disabled={props.disabled}
+      InputProps={{ readOnly: props.readOnly }}
+      error={props.error}
+      variant={props.variant || "outlined"}
+      size={props.size || "medium"}
+      color={props.color || "primary"}
+      margin={props.margin || "none"}
+      fullWidth={props.fullWidth}
+      multiline={props.multiline}
+      rows={props.multiline ? props.rows : undefined}
+      maxRows={props.multiline ? props.maxRows : undefined}
+    />
+  ),
 });

@@ -1,63 +1,149 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import { Grid } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, Stack } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Stack } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_Stack = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  {
+    name: "direction",
+    label: "Direction",
+    type: "select",
+    group: "Layout",
+    options: ["column", "row", "column-reverse", "row-reverse"],
+  },
+  {
+    name: "spacing",
+    label: "Spacing",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 16,
+    step: 0.5,
+    helper: "Theme spacing units",
+  },
+  {
+    name: "alignItems",
+    label: "Align items",
+    type: "select",
+    group: "Layout",
+    options: ["flex-start", "flex-end", "center", "baseline", "stretch"],
+  },
+  {
+    name: "justifyContent",
+    label: "Justify content",
+    type: "select",
+    group: "Layout",
+    options: [
+      "flex-start",
+      "flex-end",
+      "center",
+      "space-between",
+      "space-around",
+      "space-evenly",
+    ],
+  },
+  {
+    name: "flexWrap",
+    label: "Flex wrap",
+    type: "select",
+    group: "Layout",
+    options: ["nowrap", "wrap", "wrap-reverse"],
+  },
+  {
+    name: "useFlexGap",
+    label: "Use CSS gap",
+    type: "boolean",
+    group: "Layout",
+    helper: "Use CSS gap instead of negative margins (better with wrap)",
+  },
+  {
+    name: "divider",
+    label: "Divider between items",
+    type: "boolean",
+    group: "Appearance",
+    helper: "Inserts a thin divider line between children",
+  },
+  {
+    name: "padding",
+    label: "Padding",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 8,
+    step: 0.5,
+  },
+  {
+    name: "minWidth",
+    label: "Min width (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 1200,
+    step: 20,
+  },
+  {
+    name: "maxWidth",
+    label: "Max width (px)",
+    type: "number",
+    group: "Layout",
+    min: 100,
+    max: 1600,
+    step: 20,
+  },
+  {
+    name: "bgcolor",
+    label: "Background",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "transparent",
+      "background.paper",
+      "background.default",
+      "primary.50",
+      "grey.50",
+      "grey.100",
+    ],
+  },
+];
 
+// Render a thin Box as the divider when the user opts in. Kept inline so we
+// don't pull yet another component into element-render's registry.
+function dividerElement(direction) {
+  const horizontal = direction === "row" || direction === "row-reverse";
   return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-    >
-      <Stack
-        spacing={parseInt(currentChild?.props?.spacing || 1)}
-        direction={currentChild?.props?.direction}
-        sx={{ minWidth: "90px" }}
-      >
-        <UIController currentChild={currentChild} />
-        <PropertyController currentChild={currentChild} formData={formData}>
-          <TextField
-            variant="outlined"
-            label="spacing"
-            size="small"
-            value={getFromState(formData, "spacing")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "spacing", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="direction"
-            size="small"
-            value={getFromState(formData, "direction")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "direction", e.target.value));
-            }}
-          />
-        </PropertyController>
-        {children}{" "}
-      </Stack>
-    </DropBox>
+    <div
+      style={{
+        flexShrink: 0,
+        alignSelf: "stretch",
+        backgroundColor: "rgba(0,0,0,0.12)",
+        width: horizontal ? 1 : "100%",
+        height: horizontal ? "100%" : 1,
+      }}
+    />
   );
+}
+
+export const UI_Stack = makeContainerComponent({
+  schema,
+  render: (props, children) => {
+    const direction = props.direction || "column";
+    return (
+      <Stack
+        direction={direction}
+        spacing={props.spacing !== undefined ? Number(props.spacing) : 1}
+        alignItems={props.alignItems || undefined}
+        justifyContent={props.justifyContent || undefined}
+        flexWrap={props.flexWrap || undefined}
+        useFlexGap={Boolean(props.useFlexGap)}
+        divider={props.divider ? dividerElement(direction) : undefined}
+        sx={{
+          p: props.padding !== undefined ? Number(props.padding) : undefined,
+          minWidth: props.minWidth || undefined,
+          maxWidth: props.maxWidth || undefined,
+          bgcolor: props.bgcolor || undefined,
+        }}
+      >
+        {children}
+      </Stack>
+    );
+  },
 });

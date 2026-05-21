@@ -1,202 +1,151 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
 import {
-  TextField,
-  Box,
-  Checkbox,
-  FormControlLabel,
   FormControl,
+  FormHelperText,
   InputLabel,
-  Select,
   MenuItem,
-  Button,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
+  Select,
 } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { makeLeafComponent } from "./Common/make-component";
 
-export const UI_SelectBox = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  { name: "label", label: "Label", type: "text", group: "Content" },
+  { name: "savePath", label: "Save path", type: "text", group: "Content" },
+  {
+    name: "helperText",
+    label: "Helper text",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+  {
+    name: "options",
+    label: "Options",
+    type: "json",
+    group: "Content",
+    span: "full",
+    rows: 6,
+    helper: "JSON array of { label, value, disabled? }",
+  },
+  {
+    name: "defaultValue",
+    label: "Default value",
+    type: "text",
+    group: "State",
+  },
 
-  /*React.useEffect(() => {
-    fetch("/api/weatherforecast").then((res) => {
-      alert(JSON.stringify(res));
-    });
-    //https://localhost:44379/weatherforecast
-  }, []);*/
+  {
+    name: "variant",
+    label: "Variant",
+    type: "select",
+    group: "Appearance",
+    options: ["outlined", "filled", "standard"],
+  },
+  {
+    name: "size",
+    label: "Size",
+    type: "select",
+    group: "Appearance",
+    options: ["small", "medium"],
+  },
+  {
+    name: "color",
+    label: "Color",
+    type: "select",
+    group: "Appearance",
+    options: ["primary", "secondary", "success", "error", "warning", "info"],
+  },
+  {
+    name: "margin",
+    label: "Margin",
+    type: "select",
+    group: "Appearance",
+    options: ["none", "dense", "normal"],
+  },
+  {
+    name: "fullWidth",
+    label: "Full width",
+    type: "boolean",
+    group: "Appearance",
+  },
 
-  return (
-    <Box component="span">
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+  { name: "required", label: "Required", type: "boolean", group: "Behavior" },
+  { name: "disabled", label: "Disabled", type: "boolean", group: "State" },
+  { name: "error", label: "Error state", type: "boolean", group: "State" },
+  {
+    name: "multiple",
+    label: "Multiple selection",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "autoWidth",
+    label: "Auto width",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "displayEmpty",
+    label: "Display empty value",
+    type: "boolean",
+    group: "Behavior",
+  },
+];
+
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export const UI_SelectBox = makeLeafComponent({
+  schema,
+  render: (props) => {
+    const options = asArray(props.options);
+    return (
+      <FormControl
+        size={props.size || "medium"}
+        variant={props.variant || "outlined"}
+        color={props.color || "primary"}
+        margin={props.margin || "none"}
+        required={props.required}
+        disabled={props.disabled}
+        error={props.error}
+        fullWidth={props.fullWidth}
       >
-        <FormControl fullWidth size={currentChild?.props?.size}>
-          <InputLabel>{currentChild?.props?.label}</InputLabel>
-          <Select label={currentChild?.props?.label}>
-            {/*() => {
-              debugger;
-              console.log(JSON.parse(currentChild?.props?.json || "[]"));
-            }}
-            {JSON.parse(JSON.stringify(currentChild?.props?.json) || "[]").map(
-              (obj) => {
-                return <MenuItem value={obj.value}>{obj.label}</MenuItem>;
-              }
-            )*/}
-            {(currentChild?.props?.options || []).map((obj, index) => {
-              return (
-                <MenuItem value={obj.value} key={index}>
-                  {obj.label}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
-        <UIController currentChild={currentChild} />
-        <PropertyController currentChild={currentChild} formData={formData}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                label="label"
-                size="small"
-                value={getFromState(formData, "label")}
-                onChange={(e) => {
-                  setformData(updateToState(formData, "label", e.target.value));
-                }}
-              />
-              <TextField
-                variant="outlined"
-                label="size"
-                size="small"
-                value={getFromState(formData, "size")}
-                onChange={(e) => {
-                  setformData(updateToState(formData, "size", e.target.value));
-                }}
-              />
-              <TextField
-                variant="outlined"
-                label="save path"
-                size="small"
-                value={getFromState(formData, "savePath")}
-                onChange={(e) => {
-                  setformData(
-                    updateToState(formData, "savePath", e.target.value)
-                  );
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <AddOption
-                getFromState={getFromState}
-                formData={formData}
-                updateToState={updateToState}
-                setformData={setformData}
-              />
-            </Grid>
-          </Grid>
-        </PropertyController>
-        {children}
-      </DropBox>
-    </Box>
-  );
-});
-
-function AddOption({ getFromState, formData, updateToState, setformData }) {
-  const [open, setOpen] = React.useState(false);
-  const [label, setlabel] = React.useState("");
-  const [value, setvalue] = React.useState("");
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    var _json = getFromState(formData, "options") || [];
-    _json.push({ label: label, value: value });
-    setlabel("");
-    setvalue("");
-    setformData(updateToState(formData, "options", _json));
-    setOpen(false);
-  };
-  return (
-    <div style={{ border: "1px solid #c4c4c4", padding: "1px" }}>
-      <Button variant="contained" size="small" onClick={handleClickOpen}>
-        Add Option
-      </Button>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Label</TableCell>
-            <TableCell>Value</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(getFromState(formData, "options") || []).map((obj, index) => {
+        {props.label && <InputLabel>{props.label}</InputLabel>}
+        <Select
+          label={props.label}
+          defaultValue={
+            props.multiple
+              ? Array.isArray(props.defaultValue)
+                ? props.defaultValue
+                : []
+              : (props.defaultValue ?? "")
+          }
+          multiple={Boolean(props.multiple)}
+          autoWidth={Boolean(props.autoWidth)}
+          displayEmpty={Boolean(props.displayEmpty)}
+        >
+          {options.map((opt, i) => {
+            const value = opt?.value ?? opt;
+            const label = opt?.label ?? String(opt);
             return (
-              <TableRow key={index}>
-                <TableCell>{obj?.label}</TableCell>
-                <TableCell>{obj?.value}</TableCell>
-                <TableCell></TableCell>
-              </TableRow>
+              <MenuItem key={value ?? i} value={value} disabled={opt?.disabled}>
+                {label}
+              </MenuItem>
             );
           })}
-        </TableBody>
-      </Table>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Option</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2}>
-            <TextField
-              variant="outlined"
-              label="label"
-              size="small"
-              value={label}
-              onChange={(e) => {
-                setlabel(e.target.value);
-              }}
-            />
-            <TextField
-              variant="outlined"
-              label="value"
-              size="small"
-              value={value}
-              onChange={(e) => {
-                setvalue(e.target.value);
-              }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Add</Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
-}
+        </Select>
+        {props.helperText && (
+          <FormHelperText>{props.helperText}</FormHelperText>
+        )}
+      </FormControl>
+    );
+  },
+});

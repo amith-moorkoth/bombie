@@ -1,94 +1,63 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, TableHead, TableRow } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Box } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_TableRow = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+const schema = [
+  {
+    name: "hover",
+    label: "Hover highlight",
+    type: "boolean",
+    group: "Behavior",
+  },
+  { name: "selected", label: "Selected", type: "boolean", group: "State" },
+  {
+    name: "spacing",
+    label: "Cell gap (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 64,
+    step: 4,
+  },
+  {
+    name: "minHeight",
+    label: "Min height (px)",
+    type: "number",
+    group: "Layout",
+    min: 24,
+    max: 200,
+    step: 4,
+  },
+  {
+    name: "bgcolor",
+    label: "Background",
+    type: "select",
+    group: "Appearance",
+    options: ["transparent", "grey.50", "primary.50", "warning.50", "error.50"],
+  },
+];
+
+/**
+ * Builder-mode TableRow: renders cells horizontally via flex. Preview uses
+ * proper <TableRow><TableCell>...</TableCell></TableRow>.
+ */
+export const UI_TableRow = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "stretch",
+        gap: props.spacing !== undefined ? `${Number(props.spacing)}px` : 0,
+        minHeight: props.minHeight || 40,
+        bgcolor: props.selected ? "primary.50" : props.bgcolor || undefined,
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        ...(props.hover ? { "&:hover": { bgcolor: "action.hover" } } : {}),
+      }}
     >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="tableRowIterator"
-          size="small"
-          value={getFromState(formData, "tableRowIterator")}
-          onChange={(e) => {
-            setformData(
-              updateToState(formData, "tableRowIterator", e.target.value)
-            );
-          }}
-        />
-        <TextField
-          variant="outlined"
-          label="rowKey"
-          size="small"
-          value={getFromState(formData, "rowKey")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "rowKey", e.target.value));
-          }}
-        />
-        <TextField
-          variant="outlined"
-          label="spacing"
-          size="small"
-          value={getFromState(formData, "spacing")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "spacing", e.target.value));
-          }}
-        />
-      </PropertyController>
-      <Stack
-        spacing={parseInt(currentChild?.props?.spacing || 1)}
-        direction={"row"}
-        sx={{ minWidth: "90px" }}
-      >
-        {children}
-      </Stack>
-    </DropBox>
-  );
+      {children}
+    </Box>
+  ),
 });

@@ -1,29 +1,34 @@
 import React from "react";
-
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import logo from "src/assets/logo.svg";
-function _404() {
+
+function NotFound() {
+  const navigate = useNavigate();
   return (
-    <div
-      class="d-flex align-items-center justify-content-center"
-      style={{ background: "white" }}
+    <Box
+      sx={{
+        background: "white",
+        minHeight: "60vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <div class="text-center">
-        <img src={logo} width="100" />
-        <h1 class="display-1 fw-bold">404</h1>
-        <p class="lead">The page you’re looking for doesn’t exist.</p>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            history.back();
-          }}
-          class="btn btn-primary"
-        >
+      <Stack spacing={2} alignItems="center">
+        <img src={logo} width="100" alt="Bombie logo" />
+        <Typography variant="h2" component="h1" fontWeight="bold">
+          404
+        </Typography>
+        <Typography variant="body1">
+          The page you’re looking for doesn’t exist.
+        </Typography>
+        <Button variant="contained" onClick={() => navigate(-1)}>
           Back
-        </a>
-      </div>
-    </div>
+        </Button>
+      </Stack>
+    </Box>
   );
 }
 
-export default _404;
+export default NotFound;
