@@ -1,6 +1,14 @@
 import elementBase from "./element-base";
 import elementType from "./element-type";
+
+// Catalog of palette items.
+//   - tag/name come from element-base (single source of display strings)
+//   - type drives where this element may be dropped (matched against an
+//     ancestor's `accept[]`)
+//   - accept lists the element types this element will host as children
+//     ([NONE] for leaf elements)
 const data = [
+  // ---------- Layout ----------
   {
     tag: elementBase.CARD.tag,
     name: elementBase.CARD.name,
@@ -27,7 +35,7 @@ const data = [
     tag: elementBase.CARDACTIONS.tag,
     name: elementBase.CARDACTIONS.name,
     type: elementType.CARDACTIONS,
-    accept: [elementType.LAYOUT, elementType.STACK],
+    accept: [elementType.LAYOUT, elementType.STACK, elementType.INPUTS],
   },
   {
     tag: elementBase.GRIDCONTAINER.tag,
@@ -49,6 +57,7 @@ const data = [
       elementType.STACK,
       elementType.LABEL,
       elementType.TABLE,
+      elementType.ACCORDION,
     ],
   },
   {
@@ -64,8 +73,41 @@ const data = [
       elementType.NAVIGATION,
       elementType.LABEL,
       elementType.TABLE,
+      elementType.ACCORDION,
     ],
   },
+  {
+    tag: elementBase.DIALOG.tag,
+    name: elementBase.DIALOG.name,
+    type: elementType.LAYOUT,
+    accept: [elementType.DIALOGCONTENT, elementType.DIALOGACTIONS],
+  },
+  {
+    tag: elementBase.DIALOGCONTENT.tag,
+    name: elementBase.DIALOGCONTENT.name,
+    type: elementType.DIALOGCONTENT,
+    accept: [elementType.LAYOUT, elementType.STACK],
+  },
+  {
+    tag: elementBase.DIALOGACTIONS.tag,
+    name: elementBase.DIALOGACTIONS.name,
+    type: elementType.DIALOGACTIONS,
+    accept: [elementType.LAYOUT, elementType.STACK, elementType.INPUTS],
+  },
+  {
+    tag: elementBase.ACCORDION.tag,
+    name: elementBase.ACCORDION.name,
+    type: elementType.ACCORDION,
+    accept: [
+      elementType.LAYOUT,
+      elementType.STACK,
+      elementType.INPUTS,
+      elementType.DATA_DISPLAY,
+      elementType.FEEDBACK,
+    ],
+  },
+
+  // ---------- Form Elements (Inputs) ----------
   {
     tag: elementBase.TEXTFIELD.tag,
     name: elementBase.TEXTFIELD.name,
@@ -97,6 +139,38 @@ const data = [
     accept: [elementType.NONE],
   },
   {
+    tag: elementBase.BUTTON.tag,
+    name: elementBase.BUTTON.name,
+    type: elementType.INPUTS,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.ICONBUTTON.tag,
+    name: elementBase.ICONBUTTON.name,
+    type: elementType.INPUTS,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.SWITCH.tag,
+    name: elementBase.SWITCH.name,
+    type: elementType.INPUTS,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.RADIOGROUP.tag,
+    name: elementBase.RADIOGROUP.name,
+    type: elementType.INPUTS,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.SLIDER.tag,
+    name: elementBase.SLIDER.name,
+    type: elementType.INPUTS,
+    accept: [elementType.NONE],
+  },
+
+  // ---------- Data Display ----------
+  {
     tag: elementBase.TABLE.tag,
     name: elementBase.TABLE.name,
     type: elementType.TABLE,
@@ -124,25 +198,89 @@ const data = [
     tag: elementBase.TABLECELL.tag,
     name: elementBase.TABLECELL.name,
     type: elementType.TABLECELL,
-    accept: [elementType.INPUTS, elementType.LABEL],
+    accept: [elementType.INPUTS, elementType.LABEL, elementType.DATA_DISPLAY],
   },
   {
-    tag: elementBase.DIALOG.tag,
-    name: elementBase.DIALOG.name,
-    type: elementType.LAYOUT,
-    accept: [elementType.DIALOGCONTENT, elementType.DIALOGACTIONS],
+    tag: elementBase.TYPOGRAPHY.tag,
+    name: elementBase.TYPOGRAPHY.name,
+    type: elementType.DATA_DISPLAY,
+    accept: [elementType.NONE],
   },
   {
-    tag: elementBase.DIALOGCONTENT.tag,
-    name: elementBase.DIALOGCONTENT.name,
-    type: elementType.DIALOGCONTENT,
-    accept: [elementType.LAYOUT],
+    tag: elementBase.AVATAR.tag,
+    name: elementBase.AVATAR.name,
+    type: elementType.DATA_DISPLAY,
+    accept: [elementType.NONE],
   },
   {
-    tag: elementBase.DIALOGACTIONS.tag,
-    name: elementBase.DIALOGACTIONS.name,
-    type: elementType.DIALOGACTIONS,
-    accept: [elementType.LAYOUT],
+    tag: elementBase.CHIP.tag,
+    name: elementBase.CHIP.name,
+    type: elementType.DATA_DISPLAY,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.DIVIDER.tag,
+    name: elementBase.DIVIDER.name,
+    type: elementType.DATA_DISPLAY,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.TOOLTIP.tag,
+    name: elementBase.TOOLTIP.name,
+    type: elementType.DATA_DISPLAY,
+    accept: [elementType.NONE],
+  },
+
+  // ---------- Feedback ----------
+  {
+    tag: elementBase.ALERT.tag,
+    name: elementBase.ALERT.name,
+    type: elementType.FEEDBACK,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.LINEAR_PROGRESS.tag,
+    name: elementBase.LINEAR_PROGRESS.name,
+    type: elementType.FEEDBACK,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.CIRCULAR_PROGRESS.tag,
+    name: elementBase.CIRCULAR_PROGRESS.name,
+    type: elementType.FEEDBACK,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.SKELETON.tag,
+    name: elementBase.SKELETON.name,
+    type: elementType.FEEDBACK,
+    accept: [elementType.NONE],
+  },
+
+  // ---------- Navigation ----------
+  {
+    tag: elementBase.TABS.tag,
+    name: elementBase.TABS.name,
+    type: elementType.NAVIGATION,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.STEPPER.tag,
+    name: elementBase.STEPPER.name,
+    type: elementType.NAVIGATION,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.BREADCRUMBS.tag,
+    name: elementBase.BREADCRUMBS.name,
+    type: elementType.NAVIGATION,
+    accept: [elementType.NONE],
+  },
+  {
+    tag: elementBase.PAGINATION.tag,
+    name: elementBase.PAGINATION.name,
+    type: elementType.NAVIGATION,
+    accept: [elementType.NONE],
   },
 ];
 

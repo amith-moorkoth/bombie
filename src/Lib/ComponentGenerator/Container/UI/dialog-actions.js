@@ -1,65 +1,72 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  CardActions,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { TextField, Paper, TableContainer, Table } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Box } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_DialogActions = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <CardActions>
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-      >
-        <UIController currentChild={currentChild} />
-        <PropertyController
-          currentChild={currentChild}
-          formData={formData}
-        ></PropertyController>
-        {children}
-      </DropBox>
-    </CardActions>
-  );
+const schema = [
+  {
+    name: "justifyContent",
+    label: "Justify content",
+    type: "select",
+    group: "Layout",
+    options: [
+      "flex-start",
+      "flex-end",
+      "center",
+      "space-between",
+      "space-around",
+      "space-evenly",
+    ],
+  },
+  {
+    name: "alignItems",
+    label: "Align items",
+    type: "select",
+    group: "Layout",
+    options: ["flex-start", "flex-end", "center", "baseline", "stretch"],
+  },
+  {
+    name: "padding",
+    label: "Padding",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 8,
+    step: 0.5,
+  },
+  {
+    name: "gap",
+    label: "Gap between actions (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 64,
+    step: 4,
+  },
+  {
+    name: "topBorder",
+    label: "Top border",
+    type: "boolean",
+    group: "Appearance",
+    helper: "Adds a divider above the actions",
+  },
+];
+
+export const UI_DialogActions = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: props.alignItems || "center",
+        justifyContent: props.justifyContent || "flex-end",
+        gap: props.gap !== undefined ? `${Number(props.gap)}px` : "8px",
+        p: props.padding !== undefined ? Number(props.padding) : 2,
+        borderTop: props.topBorder ? "1px solid" : undefined,
+        borderColor: "divider",
+      }}
+    >
+      {children}
+    </Box>
+  ),
 });

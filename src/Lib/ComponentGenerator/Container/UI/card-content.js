@@ -1,75 +1,52 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  CardContent,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import TextField from "@mui/material/TextField";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { CardContent } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_CardContent = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+const schema = [
+  {
+    name: "padding",
+    label: "Padding",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 8,
+    step: 0.5,
+    helper: "Theme spacing units (multiplied by 8px)",
+  },
+  {
+    name: "removeLastChildPadding",
+    label: "Remove last-child bottom padding",
+    type: "boolean",
+    group: "Layout",
+    helper: "Useful when this is the last section in a card",
+  },
+  {
+    name: "bgcolor",
+    label: "Background",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "transparent",
+      "background.paper",
+      "background.default",
+      "grey.50",
+      "grey.100",
+      "primary.50",
+    ],
+  },
+];
+
+export const UI_CardContent = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <CardContent
+      sx={{
+        p: props.padding !== undefined ? Number(props.padding) : undefined,
+        bgcolor: props.bgcolor || undefined,
+        "&:last-child": props.removeLastChildPadding ? { pb: 0 } : undefined,
+      }}
     >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="padding"
-          size="small"
-          value={getFromState(formData, "padding")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "padding", e.target.value));
-          }}
-        />
-      </PropertyController>
-      <CardContent
-        sx={{
-          padding: currentChild?.props?.padding || "0px !important",
-        }}
-      >
-        {children}
-      </CardContent>
-    </DropBox>
-  );
+      {children}
+    </CardContent>
+  ),
 });

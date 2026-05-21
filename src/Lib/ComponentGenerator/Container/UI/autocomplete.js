@@ -1,196 +1,168 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import { TextField, Box, Autocomplete } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Autocomplete, TextField } from "@mui/material";
+import { makeLeafComponent } from "./Common/make-component";
 
-export const UI_Autocomplete = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  { name: "label", label: "Label", type: "text", group: "Content" },
+  { name: "placeholder", label: "Placeholder", type: "text", group: "Content" },
+  { name: "savePath", label: "Save path", type: "text", group: "Content" },
+  {
+    name: "helperText",
+    label: "Helper text",
+    type: "text",
+    group: "Content",
+    span: "full",
+  },
+  {
+    name: "options",
+    label: "Options",
+    type: "json",
+    group: "Content",
+    span: "full",
+    rows: 6,
+    helper: "JSON array of strings or { label, value }",
+  },
+  {
+    name: "optionsURL",
+    label: "Options URL",
+    type: "text",
+    group: "Content",
+    span: "full",
+    helper: "Fetch options from this URL at runtime (not used in preview)",
+  },
+  {
+    name: "getOptionLabel",
+    label: "Option label key",
+    type: "text",
+    group: "Content",
+    helper: "Dot path to read each option's label, e.g. 'label' or 'name'",
+  },
 
-  /*React.useEffect(() => {
-    fetch("/api/weatherforecast").then((res) => {
-      alert(JSON.stringify(res));
-    });
-    //https://localhost:44379/weatherforecast
-  }, []);*/
+  {
+    name: "freeSolo",
+    label: "Free solo",
+    type: "boolean",
+    group: "Behavior",
+    helper: "Allow values not in the options list",
+  },
+  {
+    name: "multiple",
+    label: "Multiple selection",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "disableClearable",
+    label: "Disable clear icon",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "autoHighlight",
+    label: "Auto-highlight first",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "openOnFocus",
+    label: "Open on focus",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "blurOnSelect",
+    label: "Blur on select",
+    type: "boolean",
+    group: "Behavior",
+  },
+  {
+    name: "selectOnFocus",
+    label: "Select on focus",
+    type: "boolean",
+    group: "Behavior",
+  },
 
-  /*function stringToJSON(str) {
-    debugger;
-    let obj = {};
-    obj.val = str;
-    return obj.val;
-  }*/
+  {
+    name: "variant",
+    label: "Variant",
+    type: "select",
+    group: "Appearance",
+    options: ["outlined", "filled", "standard"],
+  },
+  {
+    name: "size",
+    label: "Size",
+    type: "select",
+    group: "Appearance",
+    options: ["small", "medium"],
+  },
+  {
+    name: "fullWidth",
+    label: "Full width",
+    type: "boolean",
+    group: "Appearance",
+  },
+  { name: "disabled", label: "Disabled", type: "boolean", group: "State" },
+  { name: "required", label: "Required", type: "boolean", group: "State" },
+  { name: "error", label: "Error state", type: "boolean", group: "State" },
+];
 
-  const [jsonData, setjsonData] = React.useState(
-    getFromState(formData, "options")
-  );
-  const [jsonDataError, setjsonDataError] = React.useState("");
-  React.useEffect(() => {
-    try {
-      JSON5.parse(jsonData);
-      setjsonDataError("");
-    } catch (err) {
-      setjsonDataError(err.message.replace("JSON5:", "Error:"));
-    }
-  }, [jsonData]);
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
-  return (
-    <Box component="span">
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-      >
-        <Autocomplete
-          disablePortal
-          options={currentChild?.props?.options || []}
-          getOptionLabel={(option) =>
-            getFromState(option, currentChild?.props?.getOptionLabel)
+function resolvePath(obj, path) {
+  if (!path) return undefined;
+  return path
+    .split(".")
+    .reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
+}
+
+export const UI_Autocomplete = makeLeafComponent({
+  schema,
+  render: (props) => {
+    const options = asArray(props.options);
+    return (
+      <Autocomplete
+        disablePortal
+        options={options}
+        size={props.size || "medium"}
+        fullWidth={props.fullWidth}
+        disabled={props.disabled}
+        freeSolo={Boolean(props.freeSolo)}
+        multiple={Boolean(props.multiple)}
+        disableClearable={Boolean(props.disableClearable)}
+        autoHighlight={Boolean(props.autoHighlight)}
+        openOnFocus={Boolean(props.openOnFocus)}
+        blurOnSelect={Boolean(props.blurOnSelect)}
+        selectOnFocus={Boolean(props.selectOnFocus)}
+        getOptionLabel={(option) => {
+          if (typeof option === "string") return option;
+          if (props.getOptionLabel) {
+            const v = resolvePath(option, props.getOptionLabel);
+            return v != null ? String(v) : "";
           }
-          /**renderOption={(props, option) => (
-            <Box
-              component="li"
-              sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
-              {...props}
-            >
-              <img
-                loading="lazy"
-                width="20"
-                src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                alt=""
-              />
-              {option.label} ({option.code}) +{option.phone}
-            </Box>
-          )} */
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size={currentChild?.props?.size}
-              fullWidth={currentChild?.props?.fullWidth}
-              label={currentChild?.props?.label}
-            />
-          )}
-        />
-        <UIController currentChild={currentChild} />
-        <PropertyController currentChild={currentChild} formData={formData}>
+          return option?.label ?? "";
+        }}
+        renderInput={(params) => (
           <TextField
-            variant="outlined"
-            fullWidth="true"
-            label="options from URL"
-            size="small"
-            value={getFromState(formData, "optionsURL")}
-            onChange={(e) => {
-              setformData(
-                updateToState(formData, "optionsURL", e.target.value)
-              );
-            }}
+            {...params}
+            label={props.label}
+            placeholder={props.placeholder}
+            helperText={props.helperText}
+            variant={props.variant || "outlined"}
+            required={props.required}
+            error={props.error}
           />
-          <TextField
-            variant="outlined"
-            fullWidth="true"
-            label="options"
-            size="small"
-            multiline
-            rows={2}
-            value={jsonData}
-            onChange={(e) => {
-              setjsonData(e.target.value);
-              setformData(
-                updateToState(formData, "options", JSON5.parse(e.target.value))
-              );
-            }}
-          />
-          <span style={{ width: "100%", color: "red" }}>{jsonDataError}</span>
-          <br />
-          <TextField
-            variant="outlined"
-            label="getOptionLabel"
-            size="small"
-            value={getFromState(formData, "getOptionLabel")}
-            onChange={(e) => {
-              setformData(
-                updateToState(formData, "getOptionLabel", e.target.value)
-              );
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="size"
-            size="small"
-            value={getFromState(formData, "size")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "size", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="fullWidth"
-            size="small"
-            value={getFromState(formData, "fullWidth")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "fullWidth", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="label"
-            size="small"
-            value={getFromState(formData, "label")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "label", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="save path"
-            size="small"
-            value={getFromState(formData, "savePath")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "savePath", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="open Dialog By Name"
-            size="small"
-            value={getFromState(formData, "openDialogName")}
-            onChange={(e) => {
-              setformData(
-                updateToState(formData, "openDialogName", e.target.value)
-              );
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="empty parent text"
-            size="small"
-            value={getFromState(formData, "emptyParentText")}
-            onChange={(e) => {
-              setformData(
-                updateToState(formData, "emptyParentText", e.target.value)
-              );
-            }}
-          />
-        </PropertyController>
-        {children}
-      </DropBox>
-    </Box>
-  );
+        )}
+      />
+    );
+  },
 });

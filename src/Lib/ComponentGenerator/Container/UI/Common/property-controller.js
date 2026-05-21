@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid";
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import CloseIcon from "@mui/icons-material/Close";
-import { remove } from "src/Lib/Utils/json-handler";
+import { remove, updater, get } from "src/Lib/Utils/json-handler";
 import MoveGrabBox from "src/Lib/ComponentGenerator/DragBox/move";
 import {
   Grid,
@@ -19,7 +19,6 @@ import {
   Button,
   Slide,
 } from "@mui/material";
-import { updater, get } from "src/Lib/Utils/json-handler";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -44,7 +43,10 @@ export default function PropertyController({
       open={effect?.open_UIController_Dialog === currentChild.id}
       onClose={closeDialog}
       fullWidth
-      keepMounted
+      // No keepMounted: with exhaustive schemas, each canvas component has
+      // 10-20 form controls in its property panel. Keeping every one mounted
+      // for every canvas component balloons the DOM and makes click handlers
+      // take 1+ seconds. Lazy-mount on open instead.
       TransitionComponent={Transition}
       maxWidth="xl"
     >

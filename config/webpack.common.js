@@ -1,69 +1,114 @@
+const path = require("path");
+const webpack = require("webpack");
 const paths = require("./paths");
+
+// Load .env into process.env. .env is gitignored; .env.example is the template.
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+// publicPath drives both the asset URL prefix and the router basename.
+// For GitHub Pages under https://<user>.github.io/bombie/ set PUBLIC_URL_PATH=/bombie/.
+const publicUrlPath = process.env.PUBLIC_URL_PATH || "/";
+const isProduction = process.env.NODE_ENV === "production";
+
+// Content Security Policy injected into the <meta> tag in index.html.
+//
+// Notes / limitations of meta CSP:
+//   - `frame-ancestors` is ignored when set via <meta> — set it via the host's
+//     HTTP headers if your platform supports them (GitHub Pages does not).
+//   - In dev, webpack-dev-server's HMR client uses `eval`/`new Function`, so
+//     'unsafe-eval' is required to avoid console errors and broken HMR.
+//   - In production we keep script-src to 'self' (the SPA redirect lives in
+//     spa-redirect.js, not inline, so this is enough).
+//
+// MUI/emotion injects styles at runtime, so 'unsafe-inline' on style-src is
+// load-bearing in both modes.
+const cspMeta = isProduction
+  ? [
+      "default-src 'self'",
+      "img-src 'self' data: blob:",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
+      "connect-src 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ")
+  : [
+      "default-src 'self'",
+      "img-src 'self' data: blob:",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
+      "connect-src 'self' ws: wss: http: https:",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
 module.exports = {
-  // Where webpack looks to start building the bundle
   entry: [paths.src + "/index.js"],
 
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".jsx"],
+    extensions: [".js", ".jsx"],
     alias: {
       root: __dirname,
       src: paths.src,
     },
-    fallback: {
-      "react/jsx-runtime": "react/jsx-runtime.js",
-      "react/jsx-dev-runtime": "react/jsx-dev-runtime.js",
-    },
   },
 
-  // Where webpack outputs the assets and bundles
   output: {
     path: paths.build,
     filename: "[name].bundle.js",
-    publicPath: "/",
+    publicPath: publicUrlPath,
   },
 
-  // Customize the webpack build process
   plugins: [
-    // Removes/cleans build folders and unused assets when rebuilding
     new CleanWebpackPlugin(),
-
-    // Copies files from target to destination folder
     new CopyWebpackPlugin({
       patterns: [
         {
           from: paths.src + "/assets",
           to: "assets",
-          globOptions: {
-            ignore: ["*.DS_Store"],
-          },
+          globOptions: { ignore: ["**/.DS_Store"] },
+        },
+        {
+          // GitHub Pages SPA fallback — copied verbatim, not template-processed.
+          from: paths.public + "/404.html",
+          to: "404.html",
+        },
+        {
+          // External SPA redirect script (referenced by index.html). Lives in
+          // its own file so a strict prod CSP can keep script-src to 'self'.
+          from: paths.public + "/spa-redirect.js",
+          to: "spa-redirect.js",
         },
       ],
     }),
-
-    // Generates an HTML file from a template
     new HtmlWebpackPlugin({
       favicon: paths.src + "/assets/icons/fav-icon.png",
-      template: paths.public + "/index.html", // template file
-      filename: "index.html", // output file
+      template: paths.public + "/index.html",
+      filename: "index.html",
+      templateParameters: { cspMeta },
+    }),
+    // Expose a small, explicit allowlist of env vars to the bundle.
+    new webpack.DefinePlugin({
+      PUBLIC_URL_PATH: JSON.stringify(publicUrlPath),
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV || "development"
+      ),
     }),
   ],
 
-  // Determine how modules within the project are treated
   module: {
     rules: [
-      // JavaScript: Use Babel to transpile JavaScript files
       {
-        test: /\.(js|jsx|tsx)$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: ["babel-loader"],
       },
-
-      // Styles: Inject CSS into the head with source maps
       {
         test: /\.(scss|css)$/,
         use: [
@@ -72,15 +117,18 @@ module.exports = {
             loader: "css-loader",
             options: { sourceMap: true, importLoaders: 1 },
           },
-          { loader: "sass-loader", options: { sourceMap: true } },
+          {
+            loader: "sass-loader",
+            options: {
+              // The legacy JS API is removed in Dart Sass 2.0.
+              api: "modern",
+              sourceMap: true,
+            },
+          },
         ],
       },
-
-      // Images: Copy image files to build folder
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: "asset/resource" },
-
-      // Fonts and SVGs: Inline files
-      { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: "asset/inline" },
+      { test: /\.(woff2?|eot|ttf|otf|svg)$/, type: "asset/inline" },
     ],
   },
 };

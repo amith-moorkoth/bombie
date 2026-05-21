@@ -1,78 +1,79 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import { TextField, Box, Checkbox, FormControlLabel } from "@mui/material";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Checkbox, FormControlLabel } from "@mui/material";
+import { makeLeafComponent } from "./Common/make-component";
 
-export const UI_CheckBox = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
+const schema = [
+  { name: "label", label: "Label", type: "text", group: "Content" },
+  { name: "savePath", label: "Save path", type: "text", group: "Content" },
+  {
+    name: "defaultChecked",
+    label: "Default checked",
+    type: "boolean",
+    group: "State",
+  },
+  {
+    name: "indeterminate",
+    label: "Indeterminate",
+    type: "boolean",
+    group: "State",
+  },
+  { name: "disabled", label: "Disabled", type: "boolean", group: "State" },
+  { name: "required", label: "Required", type: "boolean", group: "State" },
+  {
+    name: "color",
+    label: "Color",
+    type: "select",
+    group: "Appearance",
+    options: [
+      "primary",
+      "secondary",
+      "success",
+      "error",
+      "warning",
+      "info",
+      "default",
+    ],
+  },
+  {
+    name: "size",
+    label: "Size",
+    type: "select",
+    group: "Appearance",
+    options: ["small", "medium"],
+  },
+  {
+    name: "labelPlacement",
+    label: "Label placement",
+    type: "select",
+    group: "Appearance",
+    options: ["end", "start", "top", "bottom"],
+  },
+  {
+    name: "disableRipple",
+    label: "Disable ripple",
+    type: "boolean",
+    group: "Appearance",
+  },
+];
 
-  /*React.useEffect(() => {
-    fetch("/api/weatherforecast").then((res) => {
-      alert(JSON.stringify(res));
-    });
-    //https://localhost:44379/weatherforecast
-  }, []);*/
-
-  return (
-    <Box component="span">
-      <DropBox
-        accept={currentChild?.info?.accept || []}
-        handleonDrop={(item) => handleonDrop(item, currentChild)}
-        handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-        handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
-      >
-        <FormControlLabel
-          control={<Checkbox size={currentChild?.props?.size} />}
-          label={currentChild?.props?.label}
+export const UI_CheckBox = makeLeafComponent({
+  schema,
+  render: (props) => (
+    <FormControlLabel
+      label={props.label || ""}
+      labelPlacement={props.labelPlacement || "end"}
+      disabled={props.disabled}
+      required={props.required}
+      control={
+        <Checkbox
+          defaultChecked={props.defaultChecked}
+          indeterminate={props.indeterminate}
+          disabled={props.disabled}
+          color={props.color || "primary"}
+          size={props.size || "medium"}
+          disableRipple={props.disableRipple}
         />
-        <UIController currentChild={currentChild} />
-        <PropertyController currentChild={currentChild} formData={formData}>
-          <TextField
-            variant="outlined"
-            label="label"
-            size="small"
-            value={getFromState(formData, "label")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "label", e.target.value));
-            }}
-          />{" "}
-          <TextField
-            variant="outlined"
-            label="size"
-            size="small"
-            value={getFromState(formData, "size")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "size", e.target.value));
-            }}
-          />
-          <TextField
-            variant="outlined"
-            label="save path"
-            size="small"
-            value={getFromState(formData, "savePath")}
-            onChange={(e) => {
-              setformData(updateToState(formData, "savePath", e.target.value));
-            }}
-          />
-        </PropertyController>
-        {children}
-      </DropBox>
-    </Box>
-  );
+      }
+    />
+  ),
 });

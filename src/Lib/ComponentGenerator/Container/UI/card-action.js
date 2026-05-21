@@ -1,87 +1,72 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Card,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  CardActions,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import TextField from "@mui/material/TextField";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { CardActions } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_CardAction = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+const schema = [
+  {
+    name: "justifyContent",
+    label: "Justify content",
+    type: "select",
+    group: "Layout",
+    options: [
+      "flex-start",
+      "flex-end",
+      "center",
+      "space-between",
+      "space-around",
+      "space-evenly",
+    ],
+  },
+  {
+    name: "alignItems",
+    label: "Align items",
+    type: "select",
+    group: "Layout",
+    options: ["flex-start", "flex-end", "center", "baseline", "stretch"],
+  },
+  {
+    name: "padding",
+    label: "Padding",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 8,
+    step: 0.5,
+  },
+  {
+    name: "spacing",
+    label: "Spacing between actions (px)",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 64,
+    step: 4,
+  },
+  {
+    name: "disableSpacing",
+    label: "Disable default spacing",
+    type: "boolean",
+    group: "Layout",
+    helper: "Removes MUI's default 8px between buttons",
+  },
+];
+
+export const UI_CardAction = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <CardActions
+      disableSpacing={props.disableSpacing}
+      sx={{
+        p: props.padding !== undefined ? Number(props.padding) : undefined,
+        justifyContent: props.justifyContent || "flex-end",
+        alignItems: props.alignItems || undefined,
+        gap:
+          props.spacing !== undefined
+            ? `${Number(props.spacing)}px`
+            : undefined,
+      }}
     >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="justifyContent"
-          size="small"
-          value={getFromState(formData, "justifyContent")}
-          onChange={(e) => {
-            setformData(
-              updateToState(formData, "justifyContent", e.target.value)
-            );
-          }}
-        />{" "}
-        <TextField
-          variant="outlined"
-          label="padding"
-          size="small"
-          value={getFromState(formData, "padding")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "padding", e.target.value));
-          }}
-        />
-      </PropertyController>
-      <CardActions
-        sx={{
-          padding: currentChild?.props?.padding || "0px !important",
-          justifyContent: currentChild?.props?.justifyContent || "flex-end",
-        }}
-      >
-        {children}
-      </CardActions>
-    </DropBox>
-  );
+      {children}
+    </CardActions>
+  ),
 });

@@ -1,70 +1,105 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import { DropBox } from "../../DropBox";
-import eleType from "../../Data/element-type";
-import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
-import { v4 as uuid } from "uuid";
-import {
-  Grid,
-  Badge,
-  Stack,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-} from "@mui/material";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CloseIcon from "@mui/icons-material/Close";
-import UIController from "./Common/ui-controller";
-import PropertyController from "./Common/property-controller";
-import TextField from "@mui/material/TextField";
-import { updater, get } from "src/Lib/Utils/json-handler";
-import { updateToState, getFromState } from "src/Lib/Utils/js-dom-controller";
+import { Grid } from "@mui/material";
+import { makeContainerComponent } from "./Common/make-component";
 
-export const UI_GridContainer = memo(function Container({
-  currentChild,
-  handleonDrop,
-  handleonDrop_Move,
-  handleonHover_Move,
-  children,
-}) {
-  const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
-  const [formData, setformData] = React.useState(
-    get([...data], currentChild.id)?.props || {}
-  );
-  const handleSave = () => {
-    setdata(updater([...data], currentChild.id, "props", { ...formData }));
-  };
-  return (
-    <DropBox
-      accept={currentChild?.info?.accept || []}
-      handleonDrop={(item) => handleonDrop(item, currentChild)}
-      handleonDrop_Move={(item) => handleonDrop_Move(item, currentChild)}
-      handleonHover_Move={(item) => handleonHover_Move(item, currentChild)}
+const schema = [
+  {
+    name: "spacing",
+    label: "Spacing",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 16,
+    step: 0.5,
+    helper: "Both rows and columns",
+  },
+  {
+    name: "rowSpacing",
+    label: "Row spacing",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 16,
+    step: 0.5,
+    helper: "Overrides spacing for rows",
+  },
+  {
+    name: "columnSpacing",
+    label: "Column spacing",
+    type: "number",
+    group: "Layout",
+    min: 0,
+    max: 16,
+    step: 0.5,
+    helper: "Overrides spacing for columns",
+  },
+  {
+    name: "direction",
+    label: "Direction",
+    type: "select",
+    group: "Layout",
+    options: ["row", "row-reverse", "column", "column-reverse"],
+  },
+  {
+    name: "wrap",
+    label: "Wrap",
+    type: "select",
+    group: "Layout",
+    options: ["wrap", "nowrap", "wrap-reverse"],
+  },
+  {
+    name: "alignItems",
+    label: "Align items",
+    type: "select",
+    group: "Layout",
+    options: ["flex-start", "flex-end", "center", "baseline", "stretch"],
+  },
+  {
+    name: "justifyContent",
+    label: "Justify content",
+    type: "select",
+    group: "Layout",
+    options: [
+      "flex-start",
+      "flex-end",
+      "center",
+      "space-between",
+      "space-around",
+      "space-evenly",
+    ],
+  },
+  {
+    name: "columns",
+    label: "Columns",
+    type: "number",
+    group: "Layout",
+    min: 1,
+    max: 24,
+    helper: "Total columns in this container (default 12)",
+  },
+];
+
+export const UI_GridContainer = makeContainerComponent({
+  schema,
+  render: (props, children) => (
+    <Grid
+      container
+      spacing={props.spacing !== undefined ? Number(props.spacing) : 0}
+      rowSpacing={
+        props.rowSpacing !== undefined ? Number(props.rowSpacing) : undefined
+      }
+      columnSpacing={
+        props.columnSpacing !== undefined
+          ? Number(props.columnSpacing)
+          : undefined
+      }
+      direction={props.direction || undefined}
+      wrap={props.wrap || undefined}
+      alignItems={props.alignItems || undefined}
+      justifyContent={props.justifyContent || undefined}
+      columns={props.columns !== undefined ? Number(props.columns) : undefined}
     >
-      <UIController currentChild={currentChild} />
-      <PropertyController currentChild={currentChild} formData={formData}>
-        <TextField
-          variant="outlined"
-          label="spacing"
-          size="small"
-          value={getFromState(formData, "spacing")}
-          onChange={(e) => {
-            setformData(updateToState(formData, "spacing", e.target.value));
-          }}
-        />
-      </PropertyController>
-
-      <Grid container spacing={parseInt(currentChild?.props?.spacing || 0)}>
-        {children}
-      </Grid>
-    </DropBox>
-  );
+      {children}
+    </Grid>
+  ),
 });

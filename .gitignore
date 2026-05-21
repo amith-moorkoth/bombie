@@ -1,4 +1,13 @@
 node_modules
 dist
+build
+coverage
 stats.json
 .DS_Store
+.env
+.env.local
+*.log
+npm-debug.log*
+.idea
+.vscode/*
+!.vscode/extensions.json

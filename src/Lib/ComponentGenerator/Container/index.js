@@ -1,7 +1,8 @@
 import * as React from "react";
-import { memo, useCallback, useState } from "react";
-import update from "immutability-helper";
-import { NativeTypes } from "react-dnd-html5-backend";
+import { memo, useCallback } from "react";
+import { Box, Stack, Typography } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { DropBox } from "../DropBox";
 import eleType from "../Data/element-type";
 import bombieContext from "src/Lib/ComponentGenerator/bombie-context";
@@ -13,6 +14,44 @@ import {
   get,
   remove,
 } from "src/Lib/Utils/json-handler";
+
+function EmptyCanvasHint() {
+  const theme = useTheme();
+  return (
+    <Stack
+      alignItems="center"
+      justifyContent="center"
+      spacing={1.5}
+      sx={{
+        py: { xs: 6, md: 10 },
+        textAlign: "center",
+        color: "text.secondary",
+        pointerEvents: "none",
+      }}
+    >
+      <Box
+        sx={{
+          width: 64,
+          height: 64,
+          borderRadius: 2,
+          border: `2px dashed ${alpha(theme.palette.primary.main, 0.4)}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "primary.main",
+        }}
+      >
+        <AddOutlinedIcon fontSize="large" />
+      </Box>
+      <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary" }}>
+        Start building your component
+      </Typography>
+      <Typography variant="body2">
+        Drag components from the right panel and drop them here
+      </Typography>
+    </Stack>
+  );
+}
 
 export const Container = memo(function Container() {
   const [data, setdata, effect, seteffect] = React.useContext(bombieContext);
@@ -43,9 +82,8 @@ export const Container = memo(function Container() {
 
   const handleonDrop_Move = useCallback(
     (item) => {
-      debugger;
-      let newdata = get([...data], item.id);
-      let mainArray = remove([...data], item.id);
+      const newdata = get([...data], item.id);
+      const mainArray = remove([...data], item.id);
       setdata([...mainArray, newdata]);
     },
     [data]
@@ -73,23 +111,27 @@ export const Container = memo(function Container() {
     [data]
   );
 
+  const isEmpty = !data || data.length === 0;
+
   return (
-    <div>
-      <div style={{ overflow: "hidden", clear: "both" }}>
-        <DropBox
-          accept={[eleType.LAYOUT, eleType.CARD]}
-          handleonDrop={(item) => handleDrop(item)}
-          handleonDrop_Move={(item) => handleonDrop_Move(item)}
-          handleonHover_Move={(item) => handleonHover_Move(item)}
-        >
+    <Box sx={{ overflow: "hidden", clear: "both" }}>
+      <DropBox
+        accept={[eleType.LAYOUT, eleType.CARD]}
+        handleonDrop={(item) => handleDrop(item)}
+        handleonDrop_Move={(item) => handleonDrop_Move(item)}
+        handleonHover_Move={(item) => handleonHover_Move(item)}
+      >
+        {isEmpty ? (
+          <EmptyCanvasHint />
+        ) : (
           <ElementRecursion
             data={data}
             handleonDrop={handleDropInner}
             handleonDrop_Move={handleonDrop_MoveInner}
             handleonHover_Move={handleonDrop_MoveInner}
           />
-        </DropBox>
-      </div>
-    </div>
+        )}
+      </DropBox>
+    </Box>
   );
 });
